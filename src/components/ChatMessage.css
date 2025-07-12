@@ -1,0 +1,42 @@
+.chat-message {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+/* Mensagens do paciente ficam à esquerda */
+.chat-message.patient {
+  justify-content: flex-start;
+}
+
+/* Mensagens do sistema (perguntas automáticas) ficam à direita */
+.chat-message.system {
+  justify-content: flex-end;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 0.8rem 1rem;
+  border-radius: 18px;
+}
+
+.chat-message.patient .message-bubble {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+}
+
+.chat-message.system .message-bubble {
+  background-color: #dcf8c6;
+}
+
+.message-text {
+  margin: 0;
+  color: #333;
+}
+
+.message-timestamp {
+  display: block;
+  text-align: right;
+  font-size: 0.75rem;
+  color: #999;
+  margin-top: 0.3rem;
+}

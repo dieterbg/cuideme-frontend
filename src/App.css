@@ -1,42 +1,50 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
+/* Estilo geral da aplicação */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Ocupa a altura toda da tela */
+  font-family: sans-serif;
+  background-color: #f4f7f6;
+}
+
+header {
+  background-color: #ffffff;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* O container principal que divide em duas colunas */
+.main-content {
+  display: flex;
+  flex-grow: 1; /* Faz essa área ocupar o espaço restante */
+  overflow: hidden; /* Evita barras de rolagem indesejadas */
+}
+
+/* Coluna da esquerda: Lista de Pacientes */
+.patient-list {
+  width: 300px;
+  border-right: 1px solid #e0e0e0;
+  padding: 1rem;
+  background-color: #ffffff;
+  overflow-y: auto; /* Adiciona barra de rolagem se a lista for grande */
+}
+
+.patient-list h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: #555;
+}
+
+/* Coluna da direita: Conversa */
+.chat-view {
+  flex-grow: 1; /* Ocupa todo o espaço restante na horizontal */
   padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+  overflow-y: auto; /* Adiciona barra de rolagem para as mensagens */
 }

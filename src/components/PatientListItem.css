@@ -1,0 +1,45 @@
+.patient-item {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.patient-item:hover {
+  background-color: #f9f9f9;
+}
+
+.patient-item.selected {
+  background-color: #e8f0fe;
+  border-right: 3px solid #1a73e8;
+}
+
+.patient-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.patient-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.patient-phone {
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.alert-indicator {
+  background-color: #d93025;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
