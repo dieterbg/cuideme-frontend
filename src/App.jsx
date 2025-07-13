@@ -1,38 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // ### MUDANÇA ### Importa o useEffect
 import './App.css';
 import PatientListItem from './components/PatientListItem';
 import ChatMessage from './components/ChatMessage';
 
-// --- DADOS FICTÍCIOS (MOCK DATA) ---
-// No futuro, isso virá do nosso backend
-const mockPatients = [
-  { id: 1, name: 'Ana Silva', phone: '(11) 98765-4321', hasAlert: true },
-  { id: 2, name: 'Carlos Souza', phone: '(21) 91234-5678', hasAlert: false },
-  { id: 3, name: 'Mariana Costa', phone: '(31) 95555-8888', hasAlert: false },
-];
+// ### MUDANÇA ### A URL base da nossa API vem do arquivo .env
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const mockMessages = {
-  1: [ // Mensagens da Ana Silva (id: 1)
-    { id: 101, sender: 'system', text: 'Olá, Ana! Como você se sentiu hoje?', timestamp: '09:00' },
-    { id: 102, sender: 'patient', text: 'Olá. Hoje acordei com muita dor de cabeça.', timestamp: '09:05' },
-    { id: 103, sender: 'system', text: 'Entendido. Você tomou sua medicação?', timestamp: '09:06' },
-    { id: 104, sender: 'patient', text: 'Ainda não tomei.', timestamp: '09:07' },
-  ],
-  2: [ // Mensagens do Carlos Souza (id: 2)
-    { id: 201, sender: 'system', text: 'Bom dia, Carlos! Lembre-se de medir sua pressão.', timestamp: '08:30' },
-    { id: 202, sender: 'patient', text: 'Bom dia. Já medi, tudo certo!', timestamp: '08:32' },
-  ],
-  3: [], // Mariana não tem mensagens
-};
-// --- FIM DOS DADOS FICTÍCIOS ---
-
+// ### MUDANÇA ### REMOVEMOS COMPLETAMENTE OS DADOS FICTÍCIOS (mockPatients e mockMessages )
 
 function App() {
-  // 'useState' é um "Hook" do React para guardar o estado do componente.
-  // Aqui, guardamos o ID do paciente que está selecionado no momento.
+  // ### MUDANÇA ### Criamos mais estados para gerenciar os dados e o carregamento
+  const [patients, setPatients] = useState([]); // Armazenará a lista de pacientes vinda da API
+  const [messages, setMessages] = useState([]); // Armazenará as mensagens do paciente selecionado
   const [selectedPatientId, setSelectedPatientId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // Para mostrar um feedback de "carregando"
 
-  const selectedPatientMessages = selectedPatientId ? mockMessages[selectedPatientId] : [];
+  // ### MUDANÇA ### useEffect para buscar a lista de pacientes quando o componente carrega
+  useEffect(() => {
+    // Define uma função assíncrona para buscar os dados
+    const fetchPatients = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/patients`);
+        if (!response.ok) {
+          throw new Error('Falha ao buscar pacientes');
+        }
+        const data = await response.json();
+        setPatients(data); // Atualiza o estado com os pacientes da API
+      } catch (error) {
+        console.error("Erro:", error);
+        // Aqui você poderia definir um estado de erro para mostrar na tela
+      }
+    };
+
+    fetchPatients(); // Executa a função
+  }, []); // O array vazio `[]` significa que este efeito roda apenas uma vez, quando o componente é montado
+
+  // ### MUDANÇA ### Função para lidar com a seleção de um paciente
+  const handleSelectPatient = async (patientId) => {
+    setSelectedPatientId(patientId);
+    setIsLoading(true); // Ativa o indicador de carregamento
+    setMessages([]); // Limpa as mensagens antigas
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/messages/${patientId}`);
+      if (!response.ok) {
+        throw new Error('Falha ao buscar mensagens');
+      }
+      const data = await response.json();
+      setMessages(data); // Atualiza o estado com as novas mensagens
+    } catch (error) {
+      console.error("Erro:", error);
+    } finally {
+      setIsLoading(false); // Desativa o indicador de carregamento, mesmo se der erro
+    }
+  };
 
   return (
     <div className="app-container">
@@ -42,20 +63,24 @@ function App() {
       <main className="main-content">
         <aside className="patient-list">
           <h2>Pacientes</h2>
-          {mockPatients.map(patient => (
+          {/* ### MUDANÇA ### Mapeia a lista de pacientes do estado, não mais do mock */}
+          {patients.map(patient => (
             <PatientListItem
               key={patient.id}
-              patient={patient}
+              patient={{...patient, name: patient.name || patient.phone_number}} // Usa o número se o nome for nulo
               isSelected={patient.id === selectedPatientId}
-              onSelect={setSelectedPatientId}
+              onSelect={() => handleSelectPatient(patient.id)} // ### MUDANÇA ### Chama a nova função
             />
           ))}
         </aside>
         <section className="chat-view">
-          {selectedPatientId ? (
+          {/* ### MUDANÇA ### Lógica de exibição melhorada com estado de carregamento */}
+          {isLoading ? (
+            <p>Carregando mensagens...</p>
+          ) : selectedPatientId ? (
             <>
-              {selectedPatientMessages.length > 0 ? (
-                selectedPatientMessages.map(msg => <ChatMessage key={msg.id} message={msg} />)
+              {messages.length > 0 ? (
+                messages.map(msg => <ChatMessage key={msg.id} message={msg} />)
               ) : (
                 <p>Este paciente ainda não possui mensagens.</p>
               )}
