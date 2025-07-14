@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import PatientListItem from './components/PatientListItem'; // Corrigido para o nome correto
+import PatientListItem from './components/PatientListItem';
 import ChatMessage from './components/ChatMessage';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -31,20 +31,19 @@ function App() {
     fetchPatients();
   }, []);
 
-  // ### FUNÇÃO handleSelectPatient REVISADA ###
+  // Função para lidar com a seleção de um paciente na lista
   const handleSelectPatient = (patient) => {
     console.log("Paciente clicado. Definindo como selecionado:", patient);
     
-    // Define o paciente selecionado IMEDIATAMENTE.
-    // Isso deve fazer a UI (cabeçalho e botão) aparecer.
+    // Define o paciente selecionado imediatamente para a UI responder.
     setSelectedPatient(patient);
     
-    // Limpa as mensagens antigas e mostra o estado de carregamento
+    // Limpa as mensagens antigas e mostra o estado de carregamento.
     setMessages([]);
     setLoading(true);
     setError(null);
 
-    // Agora, busca as mensagens para este paciente em uma função separada.
+    // Função interna para buscar as mensagens do paciente selecionado.
     const fetchMessages = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/messages/${patient.id}`);
@@ -53,7 +52,7 @@ function App() {
         }
         const data = await response.json();
         setMessages(data);
-        // Após buscar, atualiza a lista de pacientes para limpar o indicador de alerta
+        // Após buscar, atualiza a lista de pacientes para limpar o indicador de alerta.
         await fetchPatients();
       } catch (e) {
         console.error("Erro ao buscar mensagens:", e);
@@ -63,10 +62,11 @@ function App() {
       }
     };
 
-    // Chama a função para buscar as mensagens
+    // Chama a função para buscar as mensagens.
     fetchMessages();
   };
 
+  // Função para alternar o controle da conversa (manual/automático)
   const handleToggleControl = async () => {
     if (!selectedPatient) return;
     const isAssuming = selectedPatient.status === 'automatico';
@@ -78,9 +78,11 @@ function App() {
       });
       if (!response.ok) throw new Error('Falha ao alterar o modo de controle.');
       
+      // Busca a lista de pacientes atualizada do servidor.
       const freshPatients = await (await fetch(`${API_BASE_URL}/api/patients`)).json();
       setPatients(freshPatients);
       
+      // Encontra o paciente atualizado na nova lista e o define como selecionado.
       const updatedPatientFromList = freshPatients.find(p => p.id === selectedPatient.id);
       if (updatedPatientFromList) {
           setSelectedPatient(updatedPatientFromList);
@@ -91,6 +93,7 @@ function App() {
     }
   };
 
+  // Função para lidar com o envio de uma nova mensagem (a ser implementada)
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedPatient) return;
@@ -103,6 +106,7 @@ function App() {
     }
   };
 
+  // Lógica para o texto dinâmico do botão de controle
   const isManualMode = selectedPatient?.status === 'manual';
   const controlButtonText = isManualMode ? 'Encerrar Conversa' : 'Assumir Conversa';
 
