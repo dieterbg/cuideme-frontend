@@ -1,7 +1,7 @@
 /* Estilo geral da aplicação */
 .app-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* ALTERADO: de 'column' para 'row' */
   height: 100vh; /* Ocupa a altura toda da tela */
   font-family: sans-serif;
   background-color: #f4f7f6;
@@ -54,7 +54,7 @@ header h1 {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  /* height: 100vh; <-- REMOVIDO */
 }
 
 .chat-view.placeholder {
