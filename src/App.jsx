@@ -13,7 +13,7 @@ function App() {
   const [error, setError] = useState(null);
   const [newMessage, setNewMessage] = useState('');
 
-  // Função para buscar a lista de pacientes
+  // Busca a lista de pacientes
   const fetchPatients = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/patients`);
@@ -26,41 +26,53 @@ function App() {
     }
   };
 
-  // Busca os pacientes quando o app carrega
   useEffect(() => {
     fetchPatients();
   }, []);
 
-  // ### FUNÇÃO DE TESTE SIMPLIFICADA ###
-  // O objetivo é apenas ver se a UI atualiza ao definir o selectedPatient.
   const handleSelectPatient = (patient) => {
     console.log("--- TESTE ---");
     console.log("Paciente clicado:", patient);
-    
-    // A única coisa que esta função faz é atualizar o estado.
     setSelectedPatient(patient);
-    
     console.log("Estado 'selectedPatient' foi atualizado. A UI deveria re-renderizar agora.");
   };
 
-  // As funções abaixo permanecem as mesmas
+  // Busca mensagens ao selecionar paciente
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!selectedPatient) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/messages/${selectedPatient.id}`);
+        if (!response.ok) throw new Error("Erro ao buscar mensagens.");
+        const data = await response.json();
+        setMessages(data);
+      } catch (e) {
+        console.error("Erro ao carregar mensagens:", e);
+        setError('Não foi possível carregar as mensagens.');
+      }
+    };
+
+    fetchMessages();
+  }, [selectedPatient]);
+
   const handleToggleControl = async () => {
     if (!selectedPatient) return;
     const isAssuming = selectedPatient.status === 'automatico';
     const endpoint = isAssuming ? 'assume-control' : 'release-control';
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/patients/${selectedPatient.id}/${endpoint}`, {
         method: 'POST',
       });
       if (!response.ok) throw new Error('Falha ao alterar o modo de controle.');
-      
+
       const freshPatients = await (await fetch(`${API_BASE_URL}/api/patients`)).json();
       setPatients(freshPatients);
-      
+
       const updatedPatientFromList = freshPatients.find(p => p.id === selectedPatient.id);
       if (updatedPatientFromList) {
-          setSelectedPatient(updatedPatientFromList);
+        setSelectedPatient(updatedPatientFromList);
       }
     } catch (e) {
       console.error("Erro ao alterar controle:", e);
@@ -90,7 +102,7 @@ function App() {
         selectedPatientId={selectedPatient?.id}
         onSelectPatient={handleSelectPatient}
       />
-      
+
       <div className="chat-view">
         {!selectedPatient ? (
           <div className="chat-view placeholder">Selecione um paciente para ver a conversa.</div>
@@ -102,10 +114,15 @@ function App() {
                 {controlButtonText}
               </button>
             </header>
-            
+
             <div className="messages-list">
-              {/* A busca de mensagens está desativada neste teste */}
-              <p>Modo de teste: a busca de mensagens está desativada.</p>
+              {messages.length === 0 ? (
+                <p>Nenhuma mensagem encontrada.</p>
+              ) : (
+                messages.map((msg) => (
+                  <ChatMessage key={msg.id} message={msg} />
+                ))
+              )}
             </div>
 
             {isManualMode && (
