@@ -1,4 +1,4 @@
-import PatientList from './components/PatientList';
+import PatientList from './components/PatientListItem'; // Mude 'PatientList' para 'PatientListItem'
 import { useState, useEffect } from 'react';
 import './App.css';
 import ChatMessage from './components/ChatMessage';
