@@ -31,42 +31,19 @@ function App() {
     fetchPatients();
   }, []);
 
-  // Função para lidar com a seleção de um paciente na lista
+  // ### FUNÇÃO DE TESTE SIMPLIFICADA ###
+  // O objetivo é apenas ver se a UI atualiza ao definir o selectedPatient.
   const handleSelectPatient = (patient) => {
-    console.log("Paciente clicado. Definindo como selecionado:", patient);
+    console.log("--- TESTE ---");
+    console.log("Paciente clicado:", patient);
     
-    // Define o paciente selecionado imediatamente para a UI responder.
+    // A única coisa que esta função faz é atualizar o estado.
     setSelectedPatient(patient);
     
-    // Limpa as mensagens antigas e mostra o estado de carregamento.
-    setMessages([]);
-    setLoading(true);
-    setError(null);
-
-    // Função interna para buscar as mensagens do paciente selecionado.
-    const fetchMessages = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/messages/${patient.id}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setMessages(data);
-        // Após buscar, atualiza a lista de pacientes para limpar o indicador de alerta.
-        await fetchPatients();
-      } catch (e) {
-        console.error("Erro ao buscar mensagens:", e);
-        setError('Não foi possível carregar as mensagens.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Chama a função para buscar as mensagens.
-    fetchMessages();
+    console.log("Estado 'selectedPatient' foi atualizado. A UI deveria re-renderizar agora.");
   };
 
-  // Função para alternar o controle da conversa (manual/automático)
+  // As funções abaixo permanecem as mesmas
   const handleToggleControl = async () => {
     if (!selectedPatient) return;
     const isAssuming = selectedPatient.status === 'automatico';
@@ -78,11 +55,9 @@ function App() {
       });
       if (!response.ok) throw new Error('Falha ao alterar o modo de controle.');
       
-      // Busca a lista de pacientes atualizada do servidor.
       const freshPatients = await (await fetch(`${API_BASE_URL}/api/patients`)).json();
       setPatients(freshPatients);
       
-      // Encontra o paciente atualizado na nova lista e o define como selecionado.
       const updatedPatientFromList = freshPatients.find(p => p.id === selectedPatient.id);
       if (updatedPatientFromList) {
           setSelectedPatient(updatedPatientFromList);
@@ -93,7 +68,6 @@ function App() {
     }
   };
 
-  // Função para lidar com o envio de uma nova mensagem (a ser implementada)
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedPatient) return;
@@ -106,7 +80,6 @@ function App() {
     }
   };
 
-  // Lógica para o texto dinâmico do botão de controle
   const isManualMode = selectedPatient?.status === 'manual';
   const controlButtonText = isManualMode ? 'Encerrar Conversa' : 'Assumir Conversa';
 
@@ -131,12 +104,8 @@ function App() {
             </header>
             
             <div className="messages-list">
-              {loading && <p>Carregando mensagens...</p>}
-              {error && <p className="error">{error}</p>}
-              {!loading && messages.length === 0 && <p>Este paciente ainda não possui mensagens.</p>}
-              {messages.map((msg) => (
-                <ChatMessage key={msg.id} message={msg} />
-              ))}
+              {/* A busca de mensagens está desativada neste teste */}
+              <p>Modo de teste: a busca de mensagens está desativada.</p>
             </div>
 
             {isManualMode && (
