@@ -9,11 +9,11 @@ function App() {
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false); // Estado já existia, agora vamos usá-lo
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [newMessage, setNewMessage] = useState('');
 
-  // Busca a lista de pacientes (sem alterações aqui)
+  // Busca a lista de pacientes (sem alterações)
   const fetchPatients = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/patients`);
@@ -34,13 +34,13 @@ function App() {
     setSelectedPatient(patient);
   };
 
-  // Busca mensagens ao selecionar paciente (MODIFICADO)
+  // Busca mensagens ao selecionar paciente (sem alterações)
   useEffect(() => {
     const fetchMessages = async () => {
       if (!selectedPatient) return;
 
-      setLoading(true); // ### MUDANÇA 1: Ativa o loading
-      setError(null);   // ### MUDANÇA 2: Limpa erros anteriores
+      setLoading(true);
+      setError(null);
 
       try {
         const response = await fetch(`${API_BASE_URL}/api/messages/${selectedPatient.id}`);
@@ -51,15 +51,55 @@ function App() {
         console.error("Erro ao carregar mensagens:", e);
         setError('Não foi possível carregar as mensagens deste paciente.');
       } finally {
-        setLoading(false); // ### MUDANÇA 3: Desativa o loading (mesmo com erro)
+        setLoading(false);
       }
     };
 
     fetchMessages();
   }, [selectedPatient]);
+  
+  // ### NOVO: useEffect para gerenciar a conexão WebSocket ###
+  useEffect(() => {
+    if (!selectedPatient) return;
 
+    // Converte a URL http(s) para ws(s)
+    const wsUrl = API_BASE_URL.replace(/^http/, 'ws');
+    
+    const ws = new WebSocket(`${wsUrl}/ws/${selectedPatient.id}`);
+
+    ws.onopen = () => {
+      console.log(`Conexão WebSocket aberta para o paciente ${selectedPatient.id}`);
+    };
+
+    ws.onmessage = (event) => {
+      console.log("Mensagem recebida via WebSocket:", event.data);
+      const messageData = JSON.parse(event.data);
+      // Adiciona a nova mensagem ao estado, garantindo que não seja duplicada
+      setMessages(prevMessages => {
+          if (prevMessages.some(msg => msg.id === messageData.id)) {
+              return prevMessages;
+          }
+          return [...prevMessages, messageData];
+      });
+    };
+
+    ws.onclose = () => {
+      console.log(`Conexão WebSocket fechada para o paciente ${selectedPatient.id}`);
+    };
+
+    ws.onerror = (error) => {
+      console.error("Erro no WebSocket:", error);
+    };
+
+    // Função de limpeza: fecha a conexão ao trocar de paciente ou desmontar o componente
+    return () => {
+      ws.close();
+    };
+  }, [selectedPatient]); // Roda sempre que o paciente selecionado mudar
+
+
+  // Funções handleToggleControl e handleSendMessage permanecem as mesmas
   const handleToggleControl = async () => {
-    // ... (sem alterações nesta função)
     if (!selectedPatient) return;
     const isAssuming = selectedPatient.status === 'automatico';
     const endpoint = isAssuming ? 'assume-control' : 'release-control';
@@ -84,7 +124,6 @@ function App() {
   };
 
   const handleSendMessage = async (e) => {
-    // ... (sem alterações nesta função)
     e.preventDefault();
     if (!newMessage.trim() || !selectedPatient) return;
 
@@ -111,6 +150,7 @@ function App() {
     }
   };
 
+  // O JSX permanece o mesmo
   const isManualMode = selectedPatient?.status === 'manual';
   const controlButtonText = isManualMode ? 'Encerrar Conversa' : 'Assumir Conversa';
 
@@ -122,9 +162,7 @@ function App() {
         onSelectPatient={handleSelectPatient}
       />
 
-      {/* ### MUDANÇA 4: Adicionada a div .chat-container para posicionamento relativo */}
       <div className="chat-container">
-        {/* ### MUDANÇA 5: Renderização condicional para loading e error */}
         {loading && <div className="loading-spinner"></div>}
         {error && <div className="error-message">{error}</div>}
 
@@ -141,7 +179,6 @@ function App() {
               </header>
 
               <div className="messages-list">
-                {/* A lógica de mensagens aqui dentro não será afetada visualmente pelos loaders */}
                 {messages.length === 0 && !loading ? (
                   <p>Nenhuma mensagem encontrada.</p>
                 ) : (
