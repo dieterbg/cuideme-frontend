@@ -1,6 +1,6 @@
-import PatientList from './components/PatientListItem'; // Mude 'PatientList' para 'PatientListItem'
 import { useState, useEffect } from 'react';
 import './App.css';
+import PatientListItem from './components/PatientListItem'; // Corrigido para o nome correto
 import ChatMessage from './components/ChatMessage';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -13,6 +13,7 @@ function App() {
   const [error, setError] = useState(null);
   const [newMessage, setNewMessage] = useState('');
 
+  // Função para buscar a lista de pacientes
   const fetchPatients = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/patients`);
@@ -25,32 +26,45 @@ function App() {
     }
   };
 
+  // Busca os pacientes quando o app carrega
   useEffect(() => {
     fetchPatients();
   }, []);
 
-  const handleSelectPatient = async (patient) => {
-    // ### DIAGNÓSTICO ###
-    // Esta linha nos ajudará a ver no console do navegador se a função está sendo chamada.
-    console.log("Tentando selecionar o paciente:", patient);
-
+  // ### FUNÇÃO handleSelectPatient REVISADA ###
+  const handleSelectPatient = (patient) => {
+    console.log("Paciente clicado. Definindo como selecionado:", patient);
+    
+    // Define o paciente selecionado IMEDIATAMENTE.
+    // Isso deve fazer a UI (cabeçalho e botão) aparecer.
     setSelectedPatient(patient);
+    
+    // Limpa as mensagens antigas e mostra o estado de carregamento
+    setMessages([]);
     setLoading(true);
     setError(null);
-    setMessages([]);
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/messages/${patient.id}`);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();
-      setMessages(data);
-      // Vamos chamar fetchPatients aqui para garantir que o status de alerta seja atualizado na lista
-      await fetchPatients(); 
-    } catch (e) {
-      console.error("Erro ao buscar mensagens:", e);
-      setError('Não foi possível carregar as mensagens.');
-    } finally {
-      setLoading(false);
-    }
+
+    // Agora, busca as mensagens para este paciente em uma função separada.
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/messages/${patient.id}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setMessages(data);
+        // Após buscar, atualiza a lista de pacientes para limpar o indicador de alerta
+        await fetchPatients();
+      } catch (e) {
+        console.error("Erro ao buscar mensagens:", e);
+        setError('Não foi possível carregar as mensagens.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Chama a função para buscar as mensagens
+    fetchMessages();
   };
 
   const handleToggleControl = async () => {
@@ -64,7 +78,6 @@ function App() {
       });
       if (!response.ok) throw new Error('Falha ao alterar o modo de controle.');
       
-      // A forma mais segura de atualizar a UI é buscar os dados novamente do servidor.
       const freshPatients = await (await fetch(`${API_BASE_URL}/api/patients`)).json();
       setPatients(freshPatients);
       
@@ -72,7 +85,6 @@ function App() {
       if (updatedPatientFromList) {
           setSelectedPatient(updatedPatientFromList);
       }
-
     } catch (e) {
       console.error("Erro ao alterar controle:", e);
       setError('Não foi possível alterar o controle.');
@@ -96,7 +108,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <PatientList
+      <PatientListItem
         patients={patients}
         selectedPatientId={selectedPatient?.id}
         onSelectPatient={handleSelectPatient}
