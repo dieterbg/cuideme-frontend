@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import PatientList from './components/PatientList';
-import ChatMessage from './components/ChatMessage'; // Certifique-se que este import está correto
+import ChatMessage from './components/ChatMessage';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -11,8 +11,6 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
-  // ### NOVO ###
   const [newMessage, setNewMessage] = useState('');
 
   const fetchPatients = async () => {
@@ -32,6 +30,10 @@ function App() {
   }, []);
 
   const handleSelectPatient = async (patient) => {
+    // ### DIAGNÓSTICO ###
+    // Esta linha nos ajudará a ver no console do navegador se a função está sendo chamada.
+    console.log("Tentando selecionar o paciente:", patient);
+
     setSelectedPatient(patient);
     setLoading(true);
     setError(null);
@@ -41,7 +43,8 @@ function App() {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
       setMessages(data);
-      fetchPatients();
+      // Vamos chamar fetchPatients aqui para garantir que o status de alerta seja atualizado na lista
+      await fetchPatients(); 
     } catch (e) {
       console.error("Erro ao buscar mensagens:", e);
       setError('Não foi possível carregar as mensagens.');
@@ -50,7 +53,6 @@ function App() {
     }
   };
 
-  // ### NOVA FUNÇÃO ###
   const handleToggleControl = async () => {
     if (!selectedPatient) return;
     const isAssuming = selectedPatient.status === 'automatico';
@@ -62,16 +64,21 @@ function App() {
       });
       if (!response.ok) throw new Error('Falha ao alterar o modo de controle.');
       
-      const updatedPatient = { ...selectedPatient, status: isAssuming ? 'manual' : 'automatico' };
-      setSelectedPatient(updatedPatient);
-      setPatients(patients.map(p => p.id === updatedPatient.id ? updatedPatient : p));
+      // A forma mais segura de atualizar a UI é buscar os dados novamente do servidor.
+      const freshPatients = await (await fetch(`${API_BASE_URL}/api/patients`)).json();
+      setPatients(freshPatients);
+      
+      const updatedPatientFromList = freshPatients.find(p => p.id === selectedPatient.id);
+      if (updatedPatientFromList) {
+          setSelectedPatient(updatedPatientFromList);
+      }
+
     } catch (e) {
       console.error("Erro ao alterar controle:", e);
       setError('Não foi possível alterar o controle.');
     }
   };
 
-  // ### NOVA FUNÇÃO ###
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedPatient) return;
@@ -84,7 +91,6 @@ function App() {
     }
   };
 
-  // ### LÓGICA DO BOTÃO DINÂMICO (MOVIDA PARA CÁ) ###
   const isManualMode = selectedPatient?.status === 'manual';
   const controlButtonText = isManualMode ? 'Encerrar Conversa' : 'Assumir Conversa';
 
@@ -96,7 +102,6 @@ function App() {
         onSelectPatient={handleSelectPatient}
       />
       
-      {/* ### CÓDIGO DE VISUALIZAÇÃO DO CHAT (ANTIGO CHATVIEW) ### */}
       <div className="chat-view">
         {!selectedPatient ? (
           <div className="chat-view placeholder">Selecione um paciente para ver a conversa.</div>
