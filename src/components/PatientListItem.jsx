@@ -1,7 +1,6 @@
 import React from 'react';
-import './PatientList.css';
-
-function PatientList({ patients, selectedPatientId, onSelectPatient }) {
+import './PatientListItem.css'; // Mude 'PatientList.css' para 'PatientListItem.css'
+function PatientListItem({ patients, selectedPatientId, onSelectPatient }) {
   return (
     <aside className="patient-list">
       <header>
@@ -25,4 +24,4 @@ function PatientList({ patients, selectedPatientId, onSelectPatient }) {
   );
 }
 
-export default PatientList;
+export default PatientListItem;
