@@ -80,17 +80,53 @@ function App() {
     }
   };
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !selectedPatient) return;
-    try {
-      alert(`Funcionalidade de envio a ser implementada. Mensagem: ${newMessage}`);
-      setNewMessage('');
-    } catch (e) {
-      console.error("Erro ao enviar mensagem:", e);
-      setError('Não foi possível enviar a mensagem.');
+// VERSÃO ANTIGA (com alert)
+/*
+const handleSendMessage = async (e) => {
+  e.preventDefault();
+  if (!newMessage.trim() || !selectedPatient) return;
+  try {
+    alert(`Funcionalidade de envio a ser implementada. Mensagem: ${newMessage}`);
+    setNewMessage('');
+  } catch (e) {
+    console.error("Erro ao enviar mensagem:", e);
+    setError('Não foi possível enviar a mensagem.');
+  }
+};
+*/
+
+// ### NOVA VERSÃO (com chamada à API) ###
+const handleSendMessage = async (e) => {
+  e.preventDefault();
+  if (!newMessage.trim() || !selectedPatient) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/messages/send/${selectedPatient.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text: newMessage }), // Envia o texto da mensagem no corpo
+    });
+
+    if (!response.ok) {
+      throw new Error('Falha ao enviar a mensagem.');
     }
-  };
+
+    const sentMessage = await response.json(); // A API retorna a mensagem salva
+
+    // Adiciona a nova mensagem à lista de mensagens na tela imediatamente
+    setMessages(prevMessages => [...prevMessages, sentMessage]);
+    
+    // Limpa a caixa de texto
+    setNewMessage('');
+
+  } catch (e) {
+    console.error("Erro ao enviar mensagem:", e);
+    setError('Não foi possível enviar a mensagem.');
+  }
+};
+
 
   const isManualMode = selectedPatient?.status === 'manual';
   const controlButtonText = isManualMode ? 'Encerrar Conversa' : 'Assumir Conversa';

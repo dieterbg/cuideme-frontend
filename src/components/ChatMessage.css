@@ -1,42 +1,43 @@
-.chat-message {
+.message {
   display: flex;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
-/* Mensagens do paciente ficam à esquerda */
-.chat-message.patient {
-  justify-content: flex-start;
+.message.patient {
+  justify-content: flex-start; /* Mensagens do paciente à esquerda */
 }
 
-/* Mensagens do sistema (perguntas automáticas) ficam à direita */
-.chat-message.system {
-  justify-content: flex-end;
+.message.professional {
+  justify-content: flex-end; /* Mensagens do profissional à direita */
 }
 
 .message-bubble {
   max-width: 70%;
-  padding: 0.8rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 18px;
+  position: relative;
 }
 
-.chat-message.patient .message-bubble {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
+.message.patient .message-bubble {
+  background-color: #e5e5ea;
+  color: black;
 }
 
-.chat-message.system .message-bubble {
-  background-color: #dcf8c6;
+.message.professional .message-bubble {
+  background-color: #007aff; /* Cor azul para o profissional */
+  color: white;
 }
 
 .message-text {
   margin: 0;
-  color: #333;
+  padding-right: 4rem; /* Espaço para o horário */
 }
 
-.message-timestamp {
-  display: block;
-  text-align: right;
-  font-size: 0.75rem;
-  color: #999;
-  margin-top: 0.3rem;
+.message-time {
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+  font-size: 0.7rem;
+  color: inherit;
+  opacity: 0.7;
 }
