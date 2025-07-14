@@ -1,6 +1,6 @@
+import PatientList from './components/PatientList';
 import { useState, useEffect } from 'react';
 import './App.css';
-import PatientList from './components/PatientList';
 import ChatMessage from './components/ChatMessage';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;

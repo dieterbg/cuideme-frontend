@@ -1,45 +1,38 @@
-.patient-item {
+.patient-list {
+  width: 300px;
+  border-right: 1px solid var(--border-primary);
+  height: 100vh;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.patient-list header {
   padding: 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-primary);
+}
+.patient-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.patient-list li {
+  padding: 1rem;
   cursor: pointer;
+  border-bottom: 1px solid var(--border-primary);
+}
+.patient-list li:hover {
+  background-color: var(--page-secondary);
+}
+.patient-list li.selected {
+  background-color: #007aff;
+  color: white;
+}
+.patient-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: background-color 0.2s ease-in-out;
 }
-
-.patient-item:hover {
-  background-color: #f9f9f9;
-}
-
-.patient-item.selected {
-  background-color: #e8f0fe;
-  border-right: 3px solid #1a73e8;
-}
-
-.patient-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.patient-name {
-  font-weight: bold;
-  color: #333;
-}
-
-.patient-phone {
-  font-size: 0.8rem;
-  color: #777;
-}
-
 .alert-indicator {
-  background-color: #d93025;
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: #ff3b30;
   font-weight: bold;
+  font-size: 1.5rem;
 }

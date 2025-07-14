@@ -1,22 +1,28 @@
 import React from 'react';
-import './PatientListItem.css';
+import './PatientList.css';
 
-function PatientListItem({ patient, onSelect, isSelected }) {
-  const itemClassName = `patient-item ${isSelected ? 'selected' : ''}`;
-  
+function PatientList({ patients, selectedPatientId, onSelectPatient }) {
   return (
-    <div className={itemClassName} onClick={onSelect}>
-      <div className="patient-info">
-        {/* Usa o número de telefone como nome principal se o nome for nulo */}
-        <span className="patient-name">{patient.name || patient.phone_number}</span>
-        {/* Mostra o número de telefone como info secundária apenas se o nome existir */}
-        {patient.name && <span className="patient-phone">{patient.phone_number}</span>}
-      </div>
-      
-      {/* ### MUDANÇA ### Reintroduz o indicador de alerta, agora com dados reais */}
-      {patient.has_alert && <div className="alert-indicator">!</div>}
-    </div>
+    <aside className="patient-list">
+      <header>
+        <h1>Pacientes</h1>
+      </header>
+      <ul>
+        {patients.map((patient) => (
+          <li
+            key={patient.id}
+            className={patient.id === selectedPatientId ? 'selected' : ''}
+            onClick={() => onSelectPatient(patient)}
+          >
+            <div className="patient-info">
+              <span className="patient-name">{patient.name || patient.phone_number}</span>
+              {patient.has_alert && <span className="alert-indicator">!</span>}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </aside>
   );
 }
 
-export default PatientListItem;
+export default PatientList;
