@@ -48,3 +48,90 @@ header h1 {
   padding: 2rem;
   overflow-y: auto; /* Adiciona barra de rolagem para as mensagens */
 }
+/* ... (CSS existente para .app-container, .patient-list, etc.) ... */
+
+.chat-view {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.chat-view.placeholder {
+  justify-content: center;
+  align-items: center;
+  color: var(--text-secondary);
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-primary);
+  background-color: var(--page-primary);
+}
+
+.control-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--text-secondary);
+  background-color: transparent;
+  color: var(--text-secondary);
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: Roobert, sans-serif;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.control-button:hover {
+  background-color: var(--page-secondary);
+  border-color: var(--text-strong);
+  color: var(--text-strong);
+}
+
+.messages-list {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  background-color: var(--page-secondary);
+}
+
+.chat-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--border-primary);
+  background-color: var(--page-primary);
+}
+
+.message-form {
+  display: flex;
+}
+
+.message-input {
+  flex-grow: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 5px;
+  background-color: var(--page-secondary);
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.send-button {
+  margin-left: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background-color: #007aff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.send-button:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  color: #ff3b30;
+}
