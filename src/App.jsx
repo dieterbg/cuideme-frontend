@@ -9,11 +9,11 @@ function App() {
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Estado já existia, agora vamos usá-lo
   const [error, setError] = useState(null);
   const [newMessage, setNewMessage] = useState('');
 
-  // Busca a lista de pacientes
+  // Busca a lista de pacientes (sem alterações aqui)
   const fetchPatients = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/patients`);
@@ -31,16 +31,16 @@ function App() {
   }, []);
 
   const handleSelectPatient = (patient) => {
-    console.log("--- TESTE ---");
-    console.log("Paciente clicado:", patient);
     setSelectedPatient(patient);
-    console.log("Estado 'selectedPatient' foi atualizado. A UI deveria re-renderizar agora.");
   };
 
-  // Busca mensagens ao selecionar paciente
+  // Busca mensagens ao selecionar paciente (MODIFICADO)
   useEffect(() => {
     const fetchMessages = async () => {
       if (!selectedPatient) return;
+
+      setLoading(true); // ### MUDANÇA 1: Ativa o loading
+      setError(null);   // ### MUDANÇA 2: Limpa erros anteriores
 
       try {
         const response = await fetch(`${API_BASE_URL}/api/messages/${selectedPatient.id}`);
@@ -49,7 +49,9 @@ function App() {
         setMessages(data);
       } catch (e) {
         console.error("Erro ao carregar mensagens:", e);
-        setError('Não foi possível carregar as mensagens.');
+        setError('Não foi possível carregar as mensagens deste paciente.');
+      } finally {
+        setLoading(false); // ### MUDANÇA 3: Desativa o loading (mesmo com erro)
       }
     };
 
@@ -57,6 +59,7 @@ function App() {
   }, [selectedPatient]);
 
   const handleToggleControl = async () => {
+    // ... (sem alterações nesta função)
     if (!selectedPatient) return;
     const isAssuming = selectedPatient.status === 'automatico';
     const endpoint = isAssuming ? 'assume-control' : 'release-control';
@@ -80,53 +83,33 @@ function App() {
     }
   };
 
-// VERSÃO ANTIGA (com alert)
-/*
-const handleSendMessage = async (e) => {
-  e.preventDefault();
-  if (!newMessage.trim() || !selectedPatient) return;
-  try {
-    alert(`Funcionalidade de envio a ser implementada. Mensagem: ${newMessage}`);
-    setNewMessage('');
-  } catch (e) {
-    console.error("Erro ao enviar mensagem:", e);
-    setError('Não foi possível enviar a mensagem.');
-  }
-};
-*/
+  const handleSendMessage = async (e) => {
+    // ... (sem alterações nesta função)
+    e.preventDefault();
+    if (!newMessage.trim() || !selectedPatient) return;
 
-// ### NOVA VERSÃO (com chamada à API) ###
-const handleSendMessage = async (e) => {
-  e.preventDefault();
-  if (!newMessage.trim() || !selectedPatient) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/messages/send/${selectedPatient.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: newMessage }),
+      });
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/messages/send/${selectedPatient.id}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ text: newMessage }), // Envia o texto da mensagem no corpo
-    });
+      if (!response.ok) {
+        throw new Error('Falha ao enviar a mensagem.');
+      }
 
-    if (!response.ok) {
-      throw new Error('Falha ao enviar a mensagem.');
+      const sentMessage = await response.json();
+      setMessages(prevMessages => [...prevMessages, sentMessage]);
+      setNewMessage('');
+
+    } catch (e) {
+      console.error("Erro ao enviar mensagem:", e);
+      setError('Não foi possível enviar a mensagem.');
     }
-
-    const sentMessage = await response.json(); // A API retorna a mensagem salva
-
-    // Adiciona a nova mensagem à lista de mensagens na tela imediatamente
-    setMessages(prevMessages => [...prevMessages, sentMessage]);
-    
-    // Limpa a caixa de texto
-    setNewMessage('');
-
-  } catch (e) {
-    console.error("Erro ao enviar mensagem:", e);
-    setError('Não foi possível enviar a mensagem.');
-  }
-};
-
+  };
 
   const isManualMode = selectedPatient?.status === 'manual';
   const controlButtonText = isManualMode ? 'Encerrar Conversa' : 'Assumir Conversa';
@@ -139,44 +122,52 @@ const handleSendMessage = async (e) => {
         onSelectPatient={handleSelectPatient}
       />
 
-      <div className="chat-view">
-        {!selectedPatient ? (
-          <div className="chat-view placeholder">Selecione um paciente para ver a conversa.</div>
-        ) : (
-          <>
-            <header className="chat-header">
-              <h2>{selectedPatient.name || selectedPatient.phone_number}</h2>
-              <button onClick={handleToggleControl} className="control-button">
-                {controlButtonText}
-              </button>
-            </header>
+      {/* ### MUDANÇA 4: Adicionada a div .chat-container para posicionamento relativo */}
+      <div className="chat-container">
+        {/* ### MUDANÇA 5: Renderização condicional para loading e error */}
+        {loading && <div className="loading-spinner"></div>}
+        {error && <div className="error-message">{error}</div>}
 
-            <div className="messages-list">
-              {messages.length === 0 ? (
-                <p>Nenhuma mensagem encontrada.</p>
-              ) : (
-                messages.map((msg) => (
-                  <ChatMessage key={msg.id} message={msg} />
-                ))
+        <div className="chat-view">
+          {!selectedPatient ? (
+            <div className="chat-view placeholder">Selecione um paciente para ver a conversa.</div>
+          ) : (
+            <>
+              <header className="chat-header">
+                <h2>{selectedPatient.name || selectedPatient.phone_number}</h2>
+                <button onClick={handleToggleControl} className="control-button">
+                  {controlButtonText}
+                </button>
+              </header>
+
+              <div className="messages-list">
+                {/* A lógica de mensagens aqui dentro não será afetada visualmente pelos loaders */}
+                {messages.length === 0 && !loading ? (
+                  <p>Nenhuma mensagem encontrada.</p>
+                ) : (
+                  messages.map((msg) => (
+                    <ChatMessage key={msg.id} message={msg} />
+                  ))
+                )}
+              </div>
+
+              {isManualMode && (
+                <footer className="chat-footer">
+                  <form onSubmit={handleSendMessage} className="message-form">
+                    <input
+                      type="text"
+                      className="message-input"
+                      placeholder="Digite sua mensagem..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                    />
+                    <button type="submit" className="send-button">Enviar</button>
+                  </form>
+                </footer>
               )}
-            </div>
-
-            {isManualMode && (
-              <footer className="chat-footer">
-                <form onSubmit={handleSendMessage} className="message-form">
-                  <input
-                    type="text"
-                    className="message-input"
-                    placeholder="Digite sua mensagem..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                  />
-                  <button type="submit" className="send-button">Enviar</button>
-                </form>
-              </footer>
-            )}
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 /* Estilo geral da aplicação */
 .app-container {
   display: flex;
-  flex-direction: row; /* ALTERADO: de 'column' para 'row' */
-  height: 100vh; /* Ocupa a altura toda da tela */
+  flex-direction: row;
+  height: 100vh;
   font-family: sans-serif;
   background-color: #f4f7f6;
 }
@@ -42,25 +42,26 @@ header h1 {
   color: #555;
 }
 
-/* Coluna da direita: Conversa */
-.chat-view {
-  flex-grow: 1; /* Ocupa todo o espaço restante na horizontal */
-  padding: 2rem;
-  overflow-y: auto; /* Adiciona barra de rolagem para as mensagens */
+/* ########## NOVO ########## */
+/* Container para a área do chat, necessário para o posicionamento */
+.chat-container {
+  flex-grow: 1;
+  position: relative; /* Contexto para posicionamento absoluto do loader/erro */
+  display: flex; /* Garante que o chat-view ocupe o espaço */
+  flex-direction: column;
 }
-/* ... (CSS existente para .app-container, .patient-list, etc.) ... */
 
+/* Coluna da direita: Conversa */
 .chat-view {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  /* height: 100vh; <-- REMOVIDO */
 }
 
 .chat-view.placeholder {
   justify-content: center;
   align-items: center;
-  color: var(--text-secondary);
+  color: #888;
 }
 
 .chat-header {
@@ -68,39 +69,37 @@ header h1 {
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  border-bottom: 1px solid var(--border-primary);
-  background-color: var(--page-primary);
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #ffffff;
 }
 
 .control-button {
   padding: 0.5rem 1rem;
-  border: 1px solid var(--text-secondary);
+  border: 1px solid #ccc;
   background-color: transparent;
-  color: var(--text-secondary);
+  color: #555;
   border-radius: 5px;
   cursor: pointer;
-  font-family: Roobert, sans-serif;
-  font-size: 14px;
   transition: all 0.2s ease;
 }
 
 .control-button:hover {
-  background-color: var(--page-secondary);
-  border-color: var(--text-strong);
-  color: var(--text-strong);
+  background-color: #f0f0f0;
+  border-color: #333;
+  color: #333;
 }
 
 .messages-list {
   flex-grow: 1;
   overflow-y: auto;
   padding: 1rem;
-  background-color: var(--page-secondary);
+  background-color: #f4f7f6;
 }
 
 .chat-footer {
   padding: 1rem;
-  border-top: 1px solid var(--border-primary);
-  background-color: var(--page-primary);
+  border-top: 1px solid #e0e0e0;
+  background-color: #ffffff;
 }
 
 .message-form {
@@ -110,10 +109,10 @@ header h1 {
 .message-input {
   flex-grow: 1;
   padding: 0.75rem;
-  border: 1px solid var(--border-primary);
+  border: 1px solid #ccc;
   border-radius: 5px;
-  background-color: var(--page-secondary);
-  color: var(--text-primary);
+  background-color: #fff;
+  color: #333;
   font-size: 16px;
 }
 
@@ -132,6 +131,39 @@ header h1 {
   background-color: #0056b3;
 }
 
-.error {
-  color: #ff3b30;
+/* ########## NOVO ########## */
+/* Estilos para o indicador de carregamento (spinner) */
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3; /* Cinza claro */
+  border-top: 5px solid #007aff; /* Azul */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 10;
+  transform: translate(-50%, -50%); /* Centraliza perfeitamente */
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ########## NOVO ########## */
+/* Estilos para a mensagem de erro */
+.error-message {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ff3b30; /* Vermelho */
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  font-weight: 500;
 }
