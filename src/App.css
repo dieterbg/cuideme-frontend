@@ -167,3 +167,39 @@ header h1 {
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   font-weight: 500;
 }
+
+/* ... (todo o CSS anterior de App.css permanece o mesmo) ... */
+
+/* ### ADICIONAR ESTAS NOVAS CLASSES AO FINAL DO ARQUIVO ### */
+
+.chat-header {
+  /* As propriedades existentes continuam as mesmas */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #ffffff;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 0.5rem; /* Adiciona um espaço entre os botões */
+}
+
+.summarize-button {
+  background-color: #e8f5e9; /* Um verde claro para diferenciar */
+  border-color: #a5d6a7;
+  color: #2e7d32;
+}
+
+.summarize-button:hover {
+  background-color: #c8e6c9;
+}
+
+.summarize-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ... (o resto do App.css continua o mesmo) ... */

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import PatientListItem from './components/PatientListItem';
 import ChatMessage from './components/ChatMessage';
+import SummaryModal from './components/SummaryModal'; // NOVO
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -13,6 +14,12 @@ function App() {
   const [error, setError] = useState(null);
   const [newMessage, setNewMessage] = useState('');
 
+  // NOVOS ESTADOS PARA O MODAL E SUMARIZAÇÃO
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+  const [summaryContent, setSummaryContent] = useState('');
+  const [isSummarizing, setIsSummarizing] = useState(false);
+
+  // ... (fetchPatients, handleSelectPatient, useEffect de fetchMessages e de WebSocket permanecem os mesmos)
   // Busca a lista de pacientes (sem alterações)
   const fetchPatients = async () => {
     try {
@@ -58,7 +65,7 @@ function App() {
     fetchMessages();
   }, [selectedPatient]);
   
-  // ### NOVO: useEffect para gerenciar a conexão WebSocket ###
+  // useEffect para gerenciar a conexão WebSocket (sem alterações)
   useEffect(() => {
     if (!selectedPatient) return;
 
@@ -95,10 +102,37 @@ function App() {
     return () => {
       ws.close();
     };
-  }, [selectedPatient]); // Roda sempre que o paciente selecionado mudar
+  }, [selectedPatient]);
 
+  // ### NOVA FUNÇÃO PARA GERAR O RESUMO ###
+  const handleSummarize = async () => {
+    if (!selectedPatient) return;
 
-  // Funções handleToggleControl e handleSendMessage permanecem as mesmas
+    setIsSummarizing(true);
+    setIsSummaryModalOpen(true); // Abre o modal imediatamente para mostrar o loader
+    setSummaryContent(''); // Limpa o conteúdo anterior
+    setError(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/messages/${selectedPatient.id}/summarize`, {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail || 'Falha ao gerar o resumo.');
+      }
+      const data = await response.json();
+      setSummaryContent(data.summary);
+
+    } catch (e) {
+      console.error("Erro ao sumarizar:", e);
+      setSummaryContent(`Ocorreu um erro: ${e.message}`);
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
+  // ... (handleToggleControl e handleSendMessage permanecem os mesmos)
   const handleToggleControl = async () => {
     if (!selectedPatient) return;
     const isAssuming = selectedPatient.status === 'automatico';
@@ -150,7 +184,7 @@ function App() {
     }
   };
 
-  // O JSX permanece o mesmo
+
   const isManualMode = selectedPatient?.status === 'manual';
   const controlButtonText = isManualMode ? 'Encerrar Conversa' : 'Assumir Conversa';
 
@@ -171,11 +205,17 @@ function App() {
             <div className="chat-view placeholder">Selecione um paciente para ver a conversa.</div>
           ) : (
             <>
+              {/* HEADER MODIFICADO PARA INCLUIR O BOTÃO DE RESUMO */}
               <header className="chat-header">
                 <h2>{selectedPatient.name || selectedPatient.phone_number}</h2>
-                <button onClick={handleToggleControl} className="control-button">
-                  {controlButtonText}
-                </button>
+                <div className="header-buttons">
+                  <button onClick={handleSummarize} className="control-button summarize-button" disabled={isSummarizing}>
+                    {isSummarizing ? 'Gerando...' : 'Resumir com IA'}
+                  </button>
+                  <button onClick={handleToggleControl} className="control-button">
+                    {controlButtonText}
+                  </button>
+                </div>
               </header>
 
               <div className="messages-list">
@@ -206,6 +246,15 @@ function App() {
           )}
         </div>
       </div>
+      
+      {/* RENDERIZAÇÃO CONDICIONAL DO MODAL */}
+      {isSummaryModalOpen && (
+        <SummaryModal 
+          summary={summaryContent}
+          isLoading={isSummarizing}
+          onClose={() => setIsSummaryModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
